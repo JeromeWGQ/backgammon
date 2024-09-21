@@ -73,6 +73,24 @@ public class GameController : MonoBehaviour
         {
             if (moveI2J.Count == 2)
             {
+                if (die > 0)
+                {
+                    // 0-没死，1-死了黑棋，2-死了白棋
+                    // 处理被吃棋逻辑
+                    if (die == 1)
+                    {
+                        PC.moveAPiece(moveI2J[1], 26);
+                        PC.piecesArray[moveI2J[1]]--;
+                        PC.piecesArray[26]++;
+                    }
+                    else if (die == 2)
+                    {
+                        PC.moveAPiece(moveI2J[1], 27);
+                        PC.piecesArray[moveI2J[1]]++;
+                        PC.piecesArray[27]--;
+                    }
+                    die = 0;
+                }
                 PC.moveAPiece(moveI2J[0], moveI2J[1]);
                 if (currentState == State.blackMoving)
                 {
@@ -114,10 +132,11 @@ public class GameController : MonoBehaviour
 
     private List<int> positiveMoves;
 
+    private int die = 0; // 0-没死，1-死了黑棋，2-死了白棋
+
     public void ReceiveMouseDown(int index)
     {
-        // 执行点击物体时需要的操作，例如打印一句话
-        //Debug.Log("Game Controller Object Clicked: " + index);
+        // 动画播放中则退出
         if (PC.objectToMove != null) return;
         if (moveI2J.Count == 0)
         {
@@ -138,11 +157,12 @@ public class GameController : MonoBehaviour
             {
                 if (!positiveMoves.Contains(index - moveI2J[0])) { Debug.Log("点数不匹配"); canMove = false; }
                 if (PC.piecesArray[index] <= -2) { Debug.Log("有白棋在"); canMove = false; }
+                if (PC.piecesArray[index] == -1) { Debug.Log("吃掉白棋"); die = 2; }
             }
             else if (currentState == State.whiteMoving)
             {
                 if (!positiveMoves.Contains(moveI2J[0] - index)) { Debug.Log("点数不匹配"); canMove = false; }
-                if (PC.piecesArray[index] >= 2) { Debug.Log("有黑棋在"); canMove = false; }
+                if (PC.piecesArray[index] == 1) { Debug.Log("吃掉黑棋"); die = 1; }
             }
             if (!canMove) { moveI2J.RemoveAt(0); PC.removePickup(); return; }
             // 确定移动

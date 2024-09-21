@@ -33,6 +33,11 @@ public class PiecesController : MonoBehaviour
     private Vector3 startPosM; // 起始位置
     private Vector3 targetPosM; // 目标位置
 
+    private Transform nextObjectToMove; // 下一个要移动的物体
+    private float nextTimer;
+    private Vector3 nextStartPosM;
+    private Vector3 nextTargetPosM;
+
     // Update is called once per frame
     void Update()
     {
@@ -45,7 +50,7 @@ public class PiecesController : MonoBehaviour
         //}
         //if (Input.GetKeyDown(KeyCode.Space))
         //{
-        //    moveAPiece(5, 15);
+        //    moveAPiece(0, 26);
         //}
         if (objectToMove != null)
         {
@@ -53,7 +58,11 @@ public class PiecesController : MonoBehaviour
             objectToMove.position = Vector3.Lerp(startPosM, targetPosM, timer);
             if (objectToMove.position == targetPosM)
             {
-                objectToMove = null;
+                objectToMove = nextObjectToMove;
+                timer = nextTimer;
+                startPosM = nextStartPosM;
+                targetPosM = nextTargetPosM;
+                nextObjectToMove = null;
             }
         }
     }
@@ -129,7 +138,7 @@ public class PiecesController : MonoBehaviour
             {
                 targetX = xxx[23 - posIndex];
             }
-            // 计算Z坐标, todo: 叠二层的逻辑
+            // 计算Z坐标, todo: Y坐标叠二层的逻辑
             if (posIndex <= 11)
             {
                 targetZ = -6.3f + pieceIndex * 1.25f;
@@ -137,6 +146,30 @@ public class PiecesController : MonoBehaviour
             else
             {
                 targetZ = 6.3f - pieceIndex * 1.25f;
+            }
+            return new Vector3(targetX, targetY, targetZ);
+        }
+        else if (posIndex <= 25)
+        {
+            // 右下的终点槽，放白子，为24位置
+            // 右上的终点槽，放黑子，为25位置
+            return new Vector3(1f, 1f, 1f);
+        }
+        else if (posIndex <= 27)
+        {
+            // 中下的被吃棋位置，放黑子，为26位置
+            // 中上的被吃棋位置，放白子，为27位置
+            float targetX = 0f;
+            float targetY = 0.8f;
+            float targetZ = 1f;
+            // 计算Z坐标, todo: Y坐标叠二层的逻辑
+            if (posIndex == 26)
+            {
+                targetZ = -5.5f + pieceIndex * 2f;
+            }
+            else if (posIndex == 27)
+            {
+                targetZ = 5.5f - pieceIndex * 2f;
             }
             return new Vector3(targetX, targetY, targetZ);
         }
@@ -148,14 +181,24 @@ public class PiecesController : MonoBehaviour
 
     public void moveAPiece(int oriPos, int targetPos)
     {
-        if (piecesArray[oriPos] == 0 || objectToMove != null) return;
+        if (piecesArray[oriPos] == 0) return;
         GameObject go = objs[oriPos, Mathf.Abs(piecesArray[oriPos]) - 1];
         Vector3 targetV = getPieceXYZ(targetPos, Mathf.Abs(piecesArray[targetPos]));
         // 移动棋子
-        objectToMove = go.transform;
-        timer = 0f;
-        startPosM = objectToMove.position;
-        targetPosM = targetV;
+        if (objectToMove == null)
+        {
+            objectToMove = go.transform;
+            timer = 0f;
+            startPosM = objectToMove.position;
+            targetPosM = targetV;
+        }
+        else
+        {
+            nextObjectToMove = go.transform;
+            nextTimer = 0f;
+            nextStartPosM = nextObjectToMove.position;
+            nextTargetPosM = targetV;
+        }
         // 调整数据
         objs[targetPos, Mathf.Abs(piecesArray[targetPos])] = go;
         objs[oriPos, Mathf.Abs(piecesArray[oriPos]) - 1] = null;
