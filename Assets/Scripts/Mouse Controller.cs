@@ -18,7 +18,6 @@ public class MouseController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
     }
 
     // 当鼠标左键点击物体时调用此函数

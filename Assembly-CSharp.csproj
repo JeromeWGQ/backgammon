@@ -60,6 +60,7 @@
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\2022.3.42f1c1\Editor\Data\Tools\Unity.SourceGenerators\Unity.Properties.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\Scripts\SelFlash.cs" />
     <Compile Include="Assets\Scripts\Pieces Controller.cs" />
     <Compile Include="Assets\Scripts\Mouse Controller.cs" />
     <Compile Include="Assets\Scripts\Game Controller.cs" />

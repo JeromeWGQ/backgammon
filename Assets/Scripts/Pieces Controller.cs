@@ -26,6 +26,8 @@ public class PiecesController : MonoBehaviour
     {
         initPiecesData();
         initAllPiecesObject();
+        initAllPrismSel();
+        enableAllPS();
     }
 
     public Transform objectToMove; // 要移动的物体
@@ -50,7 +52,11 @@ public class PiecesController : MonoBehaviour
         //}
         //if (Input.GetKeyDown(KeyCode.Space))
         //{
-        //    moveAPiece(0, 26);
+        //    lightOnePS(10);
+        //}
+        //if (Input.GetKeyDown(KeyCode.M))
+        //{
+        //    enableAllPS();
         //}
         if (objectToMove != null)
         {
@@ -109,6 +115,39 @@ public class PiecesController : MonoBehaviour
                 }
             }
         }
+    }
+
+    public GameObject prismSelPrefab;
+    private GameObject[] pss;
+
+    void initAllPrismSel()
+    {
+        pss = new GameObject[28];
+        for (int i = 0; i < 24; i++)
+        {
+            GameObject prefabInstance = Instantiate(prismSelPrefab);
+            Vector3 pos = getPieceXYZ(i, 0);
+            pos.y = 0f;
+            if (i < 12) pos.z = -4f;
+            else pos.z = 4f;
+            prefabInstance.transform.position = pos;
+            if (i >= 12) prefabInstance.transform.Rotate(0, 0, 180);
+            prefabInstance.transform.parent = piecesParent.transform;
+            pss[i] = prefabInstance;
+        }
+    }
+
+    public void enableAllPS()
+    {
+        for (int i = 0; i < 24; i++)
+        {
+            if (pss[i] != null) pss[i].GetComponent<Renderer>().enabled = false;
+        }
+    }
+
+    public void lightOnePS(int i)
+    {
+        if (pss[i] != null) pss[i].GetComponent<Renderer>().enabled = true;
     }
 
     // 棋盘的横向坐标
@@ -216,5 +255,6 @@ public class PiecesController : MonoBehaviour
     {
         pickuped.transform.position += new Vector3(0, -0.3f, 0);
         pickuped = null;
+        enableAllPS();
     }
 }

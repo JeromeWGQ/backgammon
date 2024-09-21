@@ -147,23 +147,18 @@ public class GameController : MonoBehaviour
             Debug.Log("选择了位置1");
             PC.pickupAPiece(index);
             initPosTar();
+            for (int i = 0; i < 24; i++)
+            {
+                if (judgeCanMove(i, true))
+                {
+                    PC.lightOnePS(i);
+                }
+            }
         }
         else if (moveI2J.Count == 1)
         {
-            // 判断落脚点是否合理
             bool canMove = true;
-            if (moveI2J[0] == index) canMove = false;
-            if (currentState == State.blackMoving)
-            {
-                if (!positiveMoves.Contains(index - moveI2J[0])) { Debug.Log("点数不匹配"); canMove = false; }
-                if (PC.piecesArray[index] <= -2) { Debug.Log("有白棋在"); canMove = false; }
-                if (PC.piecesArray[index] == -1) { Debug.Log("吃掉白棋"); die = 2; }
-            }
-            else if (currentState == State.whiteMoving)
-            {
-                if (!positiveMoves.Contains(moveI2J[0] - index)) { Debug.Log("点数不匹配"); canMove = false; }
-                if (PC.piecesArray[index] == 1) { Debug.Log("吃掉黑棋"); die = 1; }
-            }
+            canMove = judgeCanMove(index, false);
             if (!canMove) { moveI2J.RemoveAt(0); PC.removePickup(); return; }
             // 确定移动
             int moveLength = Mathf.Abs(index - moveI2J[0]);
@@ -172,7 +167,27 @@ public class GameController : MonoBehaviour
             moveI2J.Add(index);
             Debug.Log("选择了位置2");
             updateNumText();
+            PC.enableAllPS();
         }
+    }
+
+    private bool judgeCanMove(int index, bool isSim)
+    {
+        // 判断落脚点是否合理
+        if (moveI2J[0] == index) return false;
+        if (currentState == State.blackMoving)
+        {
+            if (!positiveMoves.Contains(index - moveI2J[0])) { Debug.Log("点数不匹配"); return false; }
+            if (PC.piecesArray[index] <= -2) { Debug.Log("有白棋在"); return false; }
+            if (PC.piecesArray[index] == -1) { Debug.Log("吃掉白棋"); if (!isSim) die = 2; }
+        }
+        else if (currentState == State.whiteMoving)
+        {
+            if (!positiveMoves.Contains(moveI2J[0] - index)) { Debug.Log("点数不匹配"); return false; }
+            if (PC.piecesArray[index] >= 2) { Debug.Log("有黑棋在"); return false; }
+            if (PC.piecesArray[index] == 1) { Debug.Log("吃掉黑棋"); if (!isSim) die = 1; }
+        }
+        return true;
     }
 
     private int reSum;

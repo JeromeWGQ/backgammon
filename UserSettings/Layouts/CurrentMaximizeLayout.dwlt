@@ -149,7 +149,7 @@ MonoBehaviour:
   m_MinSize: {x: 100, y: 100}
   m_MaxSize: {x: 8096, y: 16192}
   vertical: 1
-  controlID: 1715
+  controlID: 18462
   draggingID: 0
 --- !u!114 &4
 MonoBehaviour:
@@ -170,8 +170,8 @@ MonoBehaviour:
     y: 0
     width: 486
     height: 651
-  m_MinSize: {x: 200, y: 200}
-  m_MaxSize: {x: 4000, y: 4000}
+  m_MinSize: {x: 201, y: 221}
+  m_MaxSize: {x: 4001, y: 4021}
   m_ActualView: {fileID: 5}
   m_Panes:
   - {fileID: 5}
@@ -216,7 +216,7 @@ MonoBehaviour:
       scrollPos: {x: 0, y: 0}
       m_SelectedIDs: 
       m_LastClickedID: 0
-      m_ExpandedIDs: 2efbffffe25c0000
+      m_ExpandedIDs: 2efbffff565d0000
       m_RenameOverlay:
         m_UserAcceptedRename: 0
         m_Name: 
@@ -311,7 +311,7 @@ MonoBehaviour:
     m_SkipHidden: 0
     m_SearchArea: 1
     m_Folders:
-    - "Assets/Prefabs/\u68CB\u5B50"
+    - Assets/Scripts
     m_Globs: []
     m_OriginalText: 
     m_ImportLogFlags: 0
@@ -319,16 +319,16 @@ MonoBehaviour:
   m_ViewMode: 1
   m_StartGridSize: 64
   m_LastFolders:
-  - "Assets/Prefabs/\u68CB\u5B50"
+  - Assets/Scripts
   m_LastFoldersGridSize: -1
   m_LastProjectPath: "C:\\Users\\\u8FC7\u6865\\Desktop\\Projects\\UnityProjects\\backgammon"
   m_LockTracker:
     m_IsLocked: 0
   m_FolderTreeState:
     scrollPos: {x: 0, y: 0}
-    m_SelectedIDs: 98600000
-    m_LastClickedID: 24728
-    m_ExpandedIDs: 00000000666000007060000000ca9a3bffffff7f
+    m_SelectedIDs: 76600000
+    m_LastClickedID: 24694
+    m_ExpandedIDs: 000000006660000000ca9a3bffffff7f
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -528,7 +528,7 @@ MonoBehaviour:
       floating: 0
       collapsed: 0
       displayed: 1
-      snapOffset: {x: 0, y: 0}
+      snapOffset: {x: 0, y: 25}
       snapOffsetDelta: {x: 0, y: 0}
       snapCorner: 0
       id: unity-scene-view-toolbar
@@ -794,9 +794,9 @@ MonoBehaviour:
   m_PlayAudio: 0
   m_AudioPlay: 0
   m_Position:
-    m_Target: {x: 483.05, y: 211, z: 0}
+    m_Target: {x: -2, y: 0, z: -4}
     speed: 2
-    m_Value: {x: 483.05, y: 211, z: 0}
+    m_Value: {x: -2, y: 0, z: -4}
   m_RenderMode: 0
   m_CameraMode:
     drawMode: 0
@@ -842,13 +842,13 @@ MonoBehaviour:
     m_GridAxis: 1
     m_gridOpacity: 0.5
   m_Rotation:
-    m_Target: {x: 0.09347716, y: -0.019413352, z: 0.001823042, w: 0.99543035}
+    m_Target: {x: 0.6427876, y: 0, z: 0, w: 0.7660445}
     speed: 2
-    m_Value: {x: 0.09347717, y: -0.019413354, z: 0.0018230423, w: 0.99543047}
+    m_Value: {x: 0.6427876, y: 0, z: 0, w: 0.7660445}
   m_Size:
-    m_Target: 290.15808
+    m_Target: 3.0594158
     speed: 2
-    m_Value: 290.15808
+    m_Value: 3.0594158
   m_Ortho:
     m_Target: 0
     speed: 2
@@ -918,8 +918,8 @@ MonoBehaviour:
     y: 0
     width: 969
     height: 464
-  m_MinSize: {x: 200, y: 200}
-  m_MaxSize: {x: 4000, y: 4000}
+  m_MinSize: {x: 202, y: 221}
+  m_MaxSize: {x: 4002, y: 4021}
   m_ActualView: {fileID: 2}
   m_Panes:
   - {fileID: 2}
@@ -944,8 +944,8 @@ MonoBehaviour:
     y: 0
     width: 484
     height: 464
-  m_MinSize: {x: 100, y: 100}
-  m_MaxSize: {x: 4000, y: 4000}
+  m_MinSize: {x: 102, y: 121}
+  m_MaxSize: {x: 4002, y: 4021}
   m_ActualView: {fileID: 14}
   m_Panes:
   - {fileID: 14}
@@ -1004,8 +1004,8 @@ MonoBehaviour:
     y: 0
     width: 621
     height: 1299
-  m_MinSize: {x: 275, y: 50}
-  m_MaxSize: {x: 4000, y: 4000}
+  m_MinSize: {x: 276, y: 71}
+  m_MaxSize: {x: 4001, y: 4021}
   m_ActualView: {fileID: 16}
   m_Panes:
   - {fileID: 16}
