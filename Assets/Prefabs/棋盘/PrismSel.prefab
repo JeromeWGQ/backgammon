@@ -519,7 +519,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 3257
+  m_VersionIndex: 3260
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -614,6 +614,3 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a952bf0e3a45a3e42ba4d1b0a708a9bc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  frequency: 2
-  amplitude: 0.5
-  speed: 0

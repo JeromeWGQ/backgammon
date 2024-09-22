@@ -6,7 +6,10 @@ using TMPro;
 public class GameController : MonoBehaviour
 {
 
-    public PiecesController PC;
+    private PiecesController PC;
+
+    public GameObject Btip;
+    public GameObject Wtip;
 
     // 游戏流程状态机
     private enum State
@@ -61,12 +64,16 @@ public class GameController : MonoBehaviour
                 currentState = State.blackMoving;
                 moveI2J = new List<int>();
                 Debug.Log("轮到黑走");
+                Btip.SetActive(true);
+                Wtip.SetActive(false);
             }
             else if (currentState == State.whiteDice)
             {
                 currentState = State.whiteMoving;
                 moveI2J = new List<int>();
                 Debug.Log("轮到白走");
+                Btip.SetActive(false);
+                Wtip.SetActive(true);
             }
         }
         if (currentState == State.blackMoving || currentState == State.whiteMoving)
@@ -102,6 +109,7 @@ public class GameController : MonoBehaviour
                     PC.piecesArray[moveI2J[0]]++;
                     PC.piecesArray[moveI2J[1]]--;
                 }
+                updateCanFinish();
                 moveI2J = new List<int>();
                 if (randomNum[0] + randomNum[1] + randomNum[2] + randomNum[3] == 0)
                 {
@@ -116,6 +124,22 @@ public class GameController : MonoBehaviour
                 }
             }
         }
+    }
+
+    private void updateCanFinish()
+    {
+        // 判断黑棋
+        int sumBF = 0;
+        for (int i = 18; i < 24; i++) sumBF += PC.piecesArray[i];
+        sumBF += PC.piecesArray[25];
+        if (sumBF == 15) blackCanFinish = true;
+        else blackCanFinish = false;
+        // 判断白棋
+        int sumWF = 0;
+        for (int i = 0; i < 6; i++) sumWF -= PC.piecesArray[i];
+        sumWF -= PC.piecesArray[24];
+        if (sumWF == 15) whiteCanFinish = true;
+        else whiteCanFinish = false;
     }
 
     private void updateNumText()
@@ -138,16 +162,31 @@ public class GameController : MonoBehaviour
     {
         // 动画播放中则退出
         if (PC.objectToMove != null) return;
+        // 右下的终点槽，放白子，为24位置
+        // 右上的终点槽，放黑子，为25位置
+        //if (index == 24 || index == 25)
+        //{
+        //    //点击24,25单独处理
+        //    if (moveI2J.Count == 0) return;
+        //    else if (moveI2J.Count == 1)
+        //    {
+        //        bool canMove = true;
+        //        if(currentState == State.blackMoving &&)
+        //        // 无法移动
+        //        if (!canMove) { moveI2J.RemoveAt(0); PC.removePickup(); return; }
+        //        // 确定移动
+        //    }
+        //}
         if (moveI2J.Count == 0)
         {
-            if (PC.piecesArray[index] == 0) return;
+            if (PC.piecesArray[index] == 0 || index == 24 || index == 25) return;
             if (currentState == State.blackMoving && PC.piecesArray[index] < 0) return;
             if (currentState == State.whiteMoving && PC.piecesArray[index] > 0) return;
             moveI2J.Add(index);
             Debug.Log("选择了位置1");
             PC.pickupAPiece(index);
             initPosTar();
-            for (int i = 0; i < 24; i++)
+            for (int i = 0; i < 26; i++)
             {
                 if (judgeCanMove(i, true))
                 {
@@ -162,6 +201,10 @@ public class GameController : MonoBehaviour
             if (!canMove) { moveI2J.RemoveAt(0); PC.removePickup(); return; }
             // 确定移动
             int moveLength = Mathf.Abs(index - moveI2J[0]);
+            if (index == 24) moveLength = 1 + moveI2J[0];
+            if (index == 25) moveLength = 24 - moveI2J[0];
+            if (moveI2J[0] == 26) moveLength = index + 1;
+            if (moveI2J[0] == 27) moveLength = 24 - index;
             reSum = moveLength;
             recurDel(0);
             moveI2J.Add(index);
@@ -171,19 +214,54 @@ public class GameController : MonoBehaviour
         }
     }
 
+    private bool blackCanFinish = false;
+    private bool whiteCanFinish = false;
+
     private bool judgeCanMove(int index, bool isSim)
     {
         // 判断落脚点是否合理
         if (moveI2J[0] == index) return false;
+        // 右下的终点槽，放白子，为24位置
+        // 右上的终点槽，放黑子，为25位置
+        // 中下的被吃棋位置，放黑子，为26位置
+        // 中上的被吃棋位置，放白子，为27位置
         if (currentState == State.blackMoving)
         {
-            if (!positiveMoves.Contains(index - moveI2J[0])) { Debug.Log("点数不匹配"); return false; }
+            if (index == 24 || moveI2J[0] == 27) return false;
+            if (index == 25)
+            {
+                if (positiveMoves.Contains(24 - moveI2J[0]) && blackCanFinish) return true;
+                else return false;
+            }
+            if (moveI2J[0] == 26)
+            {
+                // 黑棋试图从起点出发
+                if (!positiveMoves.Contains(index + 1)) return false;
+            }
+            else
+            {
+                if (!positiveMoves.Contains(index - moveI2J[0])) { Debug.Log("点数不匹配"); return false; }
+            }
             if (PC.piecesArray[index] <= -2) { Debug.Log("有白棋在"); return false; }
             if (PC.piecesArray[index] == -1) { Debug.Log("吃掉白棋"); if (!isSim) die = 2; }
         }
         else if (currentState == State.whiteMoving)
         {
-            if (!positiveMoves.Contains(moveI2J[0] - index)) { Debug.Log("点数不匹配"); return false; }
+            if (index == 25 || moveI2J[0] == 26) return false;
+            if (index == 24)
+            {
+                if (positiveMoves.Contains(1 + moveI2J[0]) && whiteCanFinish) return true;
+                else return false;
+            }
+            if (moveI2J[0] == 27)
+            {
+                // 白棋试图从起点出发
+                if (!positiveMoves.Contains(24 - index)) return false;
+            }
+            else
+            {
+                if (!positiveMoves.Contains(moveI2J[0] - index)) { Debug.Log("点数不匹配"); return false; }
+            }
             if (PC.piecesArray[index] >= 2) { Debug.Log("有黑棋在"); return false; }
             if (PC.piecesArray[index] == 1) { Debug.Log("吃掉黑棋"); if (!isSim) die = 1; }
         }

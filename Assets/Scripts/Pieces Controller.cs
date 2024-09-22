@@ -34,11 +34,13 @@ public class PiecesController : MonoBehaviour
     private float timer; // 用于控制插值的计时器
     private Vector3 startPosM; // 起始位置
     private Vector3 targetPosM; // 目标位置
+    private int targetIndex;
 
     private Transform nextObjectToMove; // 下一个要移动的物体
     private float nextTimer;
     private Vector3 nextStartPosM;
     private Vector3 nextTargetPosM;
+    private int nextTargetIndex;
 
     // Update is called once per frame
     void Update()
@@ -64,10 +66,13 @@ public class PiecesController : MonoBehaviour
             objectToMove.position = Vector3.Lerp(startPosM, targetPosM, timer);
             if (objectToMove.position == targetPosM)
             {
+                if (targetIndex == 24 || targetIndex == 25) objectToMove.transform.Rotate(-15, 0, 0);
+                // 挪动队列里的棋子
                 objectToMove = nextObjectToMove;
                 timer = nextTimer;
                 startPosM = nextStartPosM;
                 targetPosM = nextTargetPosM;
+                targetIndex = nextTargetIndex;
                 nextObjectToMove = null;
             }
         }
@@ -135,11 +140,15 @@ public class PiecesController : MonoBehaviour
             prefabInstance.transform.parent = piecesParent.transform;
             pss[i] = prefabInstance;
         }
+        // 右下的终点槽，放白子，为24位置
+        // 右上的终点槽，放黑子，为25位置
+        pss[24] = GameObject.Find("Right Sel DOWN");
+        pss[25] = GameObject.Find("Right Sel UP");
     }
 
     public void enableAllPS()
     {
-        for (int i = 0; i < 24; i++)
+        for (int i = 0; i < 26; i++)
         {
             if (pss[i] != null) pss[i].GetComponent<Renderer>().enabled = false;
         }
@@ -192,14 +201,17 @@ public class PiecesController : MonoBehaviour
         {
             // 右下的终点槽，放白子，为24位置
             // 右上的终点槽，放黑子，为25位置
-            return new Vector3(1f, 1f, 1f);
+            if (posIndex == 24)
+                return new Vector3(11.889f, 0.28f, -1.45f - pieceIndex * 0.325f);
+            else
+                return new Vector3(11.889f, 0.28f, 6.45f - pieceIndex * 0.325f);
         }
         else if (posIndex <= 27)
         {
             // 中下的被吃棋位置，放黑子，为26位置
             // 中上的被吃棋位置，放白子，为27位置
             float targetX = 0f;
-            float targetY = 0.8f;
+            float targetY = 0.3f;
             float targetZ = 1f;
             // 计算Z坐标, todo: Y坐标叠二层的逻辑
             if (posIndex == 26)
@@ -230,6 +242,7 @@ public class PiecesController : MonoBehaviour
             timer = 0f;
             startPosM = objectToMove.position;
             targetPosM = targetV;
+            targetIndex = targetPos;
         }
         else
         {
@@ -237,6 +250,7 @@ public class PiecesController : MonoBehaviour
             nextTimer = 0f;
             nextStartPosM = nextObjectToMove.position;
             nextTargetPosM = targetV;
+            nextTargetIndex = targetPos;
         }
         // 调整数据
         objs[targetPos, Mathf.Abs(piecesArray[targetPos])] = go;
@@ -248,12 +262,12 @@ public class PiecesController : MonoBehaviour
     public void pickupAPiece(int pos)
     {
         pickuped = objs[pos, Mathf.Abs(piecesArray[pos]) - 1];
-        pickuped.transform.position += new Vector3(0, 0.3f, 0);
+        pickuped.transform.position += new Vector3(0, 0.5f, 0);
     }
 
     public void removePickup()
     {
-        pickuped.transform.position += new Vector3(0, -0.3f, 0);
+        pickuped.transform.position += new Vector3(0, -0.5f, 0);
         pickuped = null;
         enableAllPS();
     }
