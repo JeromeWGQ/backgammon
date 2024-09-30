@@ -11,7 +11,7 @@ public class GameController : MonoBehaviour
     public GameObject Btip;
     public GameObject Wtip;
 
-    // ÓÎÏ·Á÷³Ì×´Ì¬»ú
+    // æ¸¸æˆæµç¨‹çŠ¶æ€æœº
     private enum State
     {
         initDice
@@ -29,12 +29,12 @@ public class GameController : MonoBehaviour
     {
         GameObject pcgo = GameObject.Find("PiecesController");
         PC = pcgo.GetComponent<PiecesController>();
-        // ÏÈ½øÈëºÚÉ«÷»×Ó½×¶Î
+        // å…ˆè¿›å…¥é»‘è‰²éª°å­é˜¶æ®µ
         currentState = State.blackDice;
-        // ÕÒµ½TextMeshPro×é¼şËùÔÚµÄGameObject
+        // æ‰¾åˆ°TextMeshProç»„ä»¶æ‰€åœ¨çš„GameObject
         GameObject textMeshProGameObjectB = GameObject.Find("Bnum");
         GameObject textMeshProGameObjectW = GameObject.Find("Wnum");
-        // »ñÈ¡TextMeshPro×é¼ş
+        // è·å–TextMeshProç»„ä»¶
         blackTextBox = textMeshProGameObjectB.GetComponent<TMP_Text>();
         whiteTextBox = textMeshProGameObjectW.GetComponent<TMP_Text>();
     }
@@ -49,7 +49,7 @@ public class GameController : MonoBehaviour
         if (currentState == State.blackDice || currentState == State.whiteDice)
         {
             randomNum = new int[4];
-            // Ëæ»ú1~6Ö®¼äµÄÕûÊı
+            // éšæœº1~6ä¹‹é—´çš„æ•´æ•°
             randomNum[0] = Random.Range(1, 7);
             randomNum[1] = Random.Range(1, 7);
             if (randomNum[0] == randomNum[1])
@@ -58,12 +58,12 @@ public class GameController : MonoBehaviour
                 randomNum[3] = randomNum[0];
             }
             updateNumText();
-            Debug.Log(randomNum[0] + "," + randomNum[1]);
+            //Debug.Log(randomNum[0] + "," + randomNum[1]);
             if (currentState == State.blackDice)
             {
                 currentState = State.blackMoving;
                 moveI2J = new List<int>();
-                Debug.Log("ÂÖµ½ºÚ×ß");
+                Debug.Log("è½®åˆ°é»‘èµ°");
                 Btip.SetActive(true);
                 Wtip.SetActive(false);
             }
@@ -71,7 +71,7 @@ public class GameController : MonoBehaviour
             {
                 currentState = State.whiteMoving;
                 moveI2J = new List<int>();
-                Debug.Log("ÂÖµ½°××ß");
+                Debug.Log("è½®åˆ°ç™½èµ°");
                 Btip.SetActive(false);
                 Wtip.SetActive(true);
             }
@@ -80,25 +80,33 @@ public class GameController : MonoBehaviour
         {
             if (moveI2J.Count == 2)
             {
-                if (die > 0)
+                // ç¡®å®šèµ°æ£‹å
+
+                // å¦‚æœæœ‰è¢«åƒæ‰çš„æ£‹å­
+                if (removeWorldIndexList.Count > 0)
                 {
-                    // 0-Ã»ËÀ£¬1-ËÀÁËºÚÆå£¬2-ËÀÁË°×Æå
-                    // ´¦Àí±»³ÔÆåÂß¼­
-                    if (die == 1)
+                    foreach (int removedPos in removeWorldIndexList)
                     {
-                        PC.moveAPiece(moveI2J[1], 26);
-                        PC.piecesArray[moveI2J[1]]--;
-                        PC.piecesArray[26]++;
+                        if (PC.piecesArray[removedPos] == 1)
+                        {
+                            // æ­»äº†é»‘æ£‹
+                            PC.moveAPieceData(removedPos, 26);
+                            PC.piecesArray[removedPos]--;
+                            PC.piecesArray[26]++;
+                            Debug.Log("æ­»é»‘æ£‹ä½ç½®ï¼š" + removedPos);
+                        }
+                        else if (PC.piecesArray[removedPos] == -1)
+                        {
+                            // æ­»äº†ç™½æ£‹
+                            PC.moveAPieceData(removedPos, 27);
+                            PC.piecesArray[removedPos]++;
+                            PC.piecesArray[27]--;
+                            Debug.Log("æ­»ç™½æ£‹ä½ç½®ï¼š" + removedPos);
+                        }
                     }
-                    else if (die == 2)
-                    {
-                        PC.moveAPiece(moveI2J[1], 27);
-                        PC.piecesArray[moveI2J[1]]++;
-                        PC.piecesArray[27]--;
-                    }
-                    die = 0;
                 }
-                PC.moveAPiece(moveI2J[0], moveI2J[1]);
+                // èµ°æ£‹é€»è¾‘
+                PC.moveAPieceData(moveI2J[0], moveI2J[1]);
                 if (currentState == State.blackMoving)
                 {
                     PC.piecesArray[moveI2J[0]]--;
@@ -109,8 +117,9 @@ public class GameController : MonoBehaviour
                     PC.piecesArray[moveI2J[0]]++;
                     PC.piecesArray[moveI2J[1]]--;
                 }
-                updateCanFinish();
+                // æ¸…ç©ºmoveI2Jï¼Œç­‰å¾…ä¸‹æ¬¡ç‚¹å‡»
                 moveI2J = new List<int>();
+                // éª°å­ç”¨å…‰ï¼Œäº¤æ¢å›åˆ
                 if (randomNum[0] + randomNum[1] + randomNum[2] + randomNum[3] == 0)
                 {
                     if (currentState == State.blackMoving)
@@ -126,20 +135,58 @@ public class GameController : MonoBehaviour
         }
     }
 
+    // æ›´æ–°åŒæ–¹ç»“æŸæƒ…å†µ
     private void updateCanFinish()
     {
-        // ÅĞ¶ÏºÚÆå
-        int sumBF = 0;
-        for (int i = 18; i < 24; i++) sumBF += PC.piecesArray[i];
-        sumBF += PC.piecesArray[25];
-        if (sumBF == 15) blackCanFinish = true;
-        else blackCanFinish = false;
-        // ÅĞ¶Ï°×Æå
-        int sumWF = 0;
-        for (int i = 0; i < 6; i++) sumWF -= PC.piecesArray[i];
-        sumWF -= PC.piecesArray[24];
-        if (sumWF == 15) whiteCanFinish = true;
-        else whiteCanFinish = false;
+        int blackFinishMax = -1;
+        int whiteFinishMax = -1;
+        if (currentState == State.blackMoving)
+        {
+            // åˆ¤æ–­é»‘æ£‹
+            int sumBF = 0;
+            for (int i = 18; i < 24; i++) sumBF += PC.piecesArray[i];
+            sumBF += PC.piecesArray[25];
+            if (sumBF == 15)
+            {
+                blackCanFinish = true;
+                // å¯¹äºå·²ç»åˆ°æœ€åä¸€è±¡é™çš„æƒ…å†µï¼Œä¸ºéª°å­æº¢å‡ºçš„æƒ…å†µé¢„è®¡ç®—
+                for (int i = 23; i >= 18; i--)
+                {
+                    if (PC.piecesArray[i] > 0)
+                    {
+                        blackFinishMax = 24 - i;
+                    }
+                }
+                Debug.Log("blackFinishMax " + blackFinishMax);
+                for (int i = 0; i < 4; i++)
+                    if (randomNum[i] > blackFinishMax)
+                        randomNum[i] = blackFinishMax;
+            }
+            else blackCanFinish = false;
+        }
+        else if (currentState == State.whiteMoving)
+        {
+            // åˆ¤æ–­ç™½æ£‹
+            int sumWF = 0;
+            for (int i = 0; i < 6; i++) sumWF -= PC.piecesArray[i];
+            sumWF -= PC.piecesArray[24];
+            if (sumWF == 15)
+            {
+                whiteCanFinish = true;
+                for (int i = 0; i <= 5; i++)
+                {
+                    if (PC.piecesArray[i] < 0)
+                    {
+                        whiteFinishMax = i + 1;
+                    }
+                }
+                Debug.Log("whiteFinishMax " + whiteFinishMax);
+                for (int i = 0; i < 4; i++)
+                    if (randomNum[i] > whiteFinishMax)
+                        randomNum[i] = whiteFinishMax;
+            }
+            else whiteCanFinish = false;
+        }
     }
 
     private void updateNumText()
@@ -154,154 +201,176 @@ public class GameController : MonoBehaviour
         }
     }
 
-    private List<int> positiveMoves;
-
-    private int die = 0; // 0-Ã»ËÀ£¬1-ËÀÁËºÚÆå£¬2-ËÀÁË°×Æå
-
+    // æ‰§è¡Œçš„èµ·ç‚¹ï¼Œå“åº”é¼ æ ‡ç‚¹å‡»äº‹ä»¶
     public void ReceiveMouseDown(int index)
     {
-        // ¶¯»­²¥·ÅÖĞÔòÍË³ö
-        if (PC.objectToMove != null) return;
-        // ÓÒÏÂµÄÖÕµã²Û£¬·Å°××Ó£¬Îª24Î»ÖÃ
-        // ÓÒÉÏµÄÖÕµã²Û£¬·ÅºÚ×Ó£¬Îª25Î»ÖÃ
-        //if (index == 24 || index == 25)
-        //{
-        //    //µã»÷24,25µ¥¶À´¦Àí
-        //    if (moveI2J.Count == 0) return;
-        //    else if (moveI2J.Count == 1)
-        //    {
-        //        bool canMove = true;
-        //        if(currentState == State.blackMoving &&)
-        //        // ÎŞ·¨ÒÆ¶¯
-        //        if (!canMove) { moveI2J.RemoveAt(0); PC.removePickup(); return; }
-        //        // È·¶¨ÒÆ¶¯
-        //    }
-        //}
         if (moveI2J.Count == 0)
         {
+            // ç¬¬ä¸€æ­¥
             if (PC.piecesArray[index] == 0 || index == 24 || index == 25) return;
             if (currentState == State.blackMoving && PC.piecesArray[index] < 0) return;
             if (currentState == State.whiteMoving && PC.piecesArray[index] > 0) return;
             moveI2J.Add(index);
-            Debug.Log("Ñ¡ÔñÁËÎ»ÖÃ1");
             PC.pickupAPiece(index);
-            initPosTar();
-            for (int i = 0; i < 26; i++)
+            updateCanFinish();
+            // åˆ¤æ–­åœ¨èµ·ç‚¹æœ‰è¢«åƒå­
+            if (PC.piecesArray[logic2world(0)] > 0 && index != logic2world(0))
             {
-                if (judgeCanMove(i, true))
-                {
-                    PC.lightOnePS(i);
-                }
+                moveI2J.RemoveAt(0); PC.removePickup(); return;
             }
+            judgeAllCanMove();
         }
         else if (moveI2J.Count == 1)
         {
-            bool canMove = true;
-            canMove = judgeCanMove(index, false);
-            if (!canMove) { moveI2J.RemoveAt(0); PC.removePickup(); return; }
-            // È·¶¨ÒÆ¶¯
-            int moveLength = Mathf.Abs(index - moveI2J[0]);
-            if (index == 24) moveLength = 1 + moveI2J[0];
-            if (index == 25) moveLength = 24 - moveI2J[0];
-            if (moveI2J[0] == 26) moveLength = index + 1;
-            if (moveI2J[0] == 27) moveLength = 24 - index;
-            reSum = moveLength;
-            recurDel(0);
+            // ç¬¬äºŒæ­¥
+            if (!canMovePos.Contains(world2logic(index)))
+            {
+                moveI2J.RemoveAt(0); PC.removePickup(); return;
+            }
+            // ç¡®å®šç§»åŠ¨
+            List<int> moveList = stepsResult[canMovePos.IndexOf(world2logic(index))];
+            int start = world2logic(moveI2J[0]);
+            removeWorldIndexList = new List<int>();
+            // æ¨¡æ‹Ÿç§»åŠ¨ï¼Œæ„å»ºè¢«åƒå­list
+            foreach (int i in moveList)
+            {
+                start += randomNum[i];
+                int pa = PC.piecesArray[logic2world(start)];
+                if (
+                    currentState == State.blackMoving && pa == -1
+                    ||
+                    currentState == State.whiteMoving && pa == 1
+                   )
+                {
+                    removeWorldIndexList.Add(logic2world(start));
+                }
+                randomNum[i] = 0;
+            }
             moveI2J.Add(index);
-            Debug.Log("Ñ¡ÔñÁËÎ»ÖÃ2");
             updateNumText();
             PC.enableAllPS();
         }
     }
 
+    // è¢«åƒæ‰çš„å­åˆé›†
+    private List<int> removeWorldIndexList;
+
     private bool blackCanFinish = false;
     private bool whiteCanFinish = false;
 
-    private bool judgeCanMove(int index, bool isSim)
+    private void judgeAllCanMove()
     {
-        // ÅĞ¶ÏÂä½ÅµãÊÇ·ñºÏÀí
-        if (moveI2J[0] == index) return false;
-        // ÓÒÏÂµÄÖÕµã²Û£¬·Å°××Ó£¬Îª24Î»ÖÃ
-        // ÓÒÉÏµÄÖÕµã²Û£¬·ÅºÚ×Ó£¬Îª25Î»ÖÃ
-        // ÖĞÏÂµÄ±»³ÔÆåÎ»ÖÃ£¬·ÅºÚ×Ó£¬Îª26Î»ÖÃ
-        // ÖĞÉÏµÄ±»³ÔÆåÎ»ÖÃ£¬·Å°××Ó£¬Îª27Î»ÖÃ
+        // æ ¸å¿ƒæ–¹æ³•ï¼Œå½“ç¬¬ä¸€ä¸ªæ£‹å­è½ä¸‹ã€ŒmoveI2J[0]ã€åï¼Œåˆ¤æ–­æ£‹å­æ‰€æœ‰å¯èƒ½è½ç‚¹ï¼Œå¹¶è®°å½•è·¯å¾„
+        // ã€ŒmoveI2J[0]ã€å’Œindexéƒ½æ˜¯æ£‹ç›˜çš„ç»å¯¹åæ ‡
+        // å·²æ·å‡ºçš„ç‚¹æ•°æˆ–å‰©ä½™çš„ç‚¹æ•°ï¼šrandomNumæ•°ç»„
+
+        // å³ä¸‹çš„ç»ˆç‚¹æ§½ï¼Œæ”¾ç™½å­ï¼Œä¸º24ä½ç½®
+        // å³ä¸Šçš„ç»ˆç‚¹æ§½ï¼Œæ”¾é»‘å­ï¼Œä¸º25ä½ç½®
+        // ä¸­ä¸‹çš„è¢«åƒæ£‹ä½ç½®ï¼Œæ”¾é»‘å­ï¼Œä¸º26ä½ç½®
+        // ä¸­ä¸Šçš„è¢«åƒæ£‹ä½ç½®ï¼Œæ”¾ç™½å­ï¼Œä¸º27ä½ç½®
+
+        stepsResult = new List<List<int>>();
+        canMovePos = new List<int>();
+
+        currentPos = world2logic(moveI2J[0]);
+        currentSteps = new List<int>();
+        recur(0);
+        currentPos = world2logic(moveI2J[0]);
+        currentSteps = new List<int>();
+        recur(1);
+        currentPos = world2logic(moveI2J[0]);
+        currentSteps = new List<int>();
+        recur(2);
+        currentPos = world2logic(moveI2J[0]);
+        currentSteps = new List<int>();
+        recur(3);
+    }
+
+    private int currentPos;
+    private List<int> canMovePos;
+    private List<int> currentSteps;
+    private List<List<int>> stepsResult;
+
+    private void recur(int index)
+    {
+        // indexä»£è¡¨randomNumæ•°ç»„çš„ä¸‹æ ‡ï¼Œ0~3
+        // æ­¥æ•°ä¸º0ï¼Œé€€å‡º
+        if (randomNum[index] == 0) return;
+        // é‡å¤è®¿é—®ï¼Œé€€å‡º
+        if (currentSteps.Contains(index)) return;
+        currentPos += randomNum[index];
+        if (currentPos >= 26)
+        {
+            // è¶…å‡ºèŒƒå›´
+            currentPos -= randomNum[index]; return;
+        }
+        if (currentPos == 25)
+        {
+            // è¾¾åˆ°ç»ˆç‚¹
+            if (currentState == State.blackMoving && !blackCanFinish) { currentPos -= randomNum[index]; return; }
+            if (currentState == State.whiteMoving && !whiteCanFinish) { currentPos -= randomNum[index]; return; }
+        }
+        // å½“å‰ä½ç½®æ˜¯å¦å¯è½å­
+        //Debug.Log("currentPos " + currentPos);
+        int pa = PC.piecesArray[logic2world(currentPos)];
+        bool canMove = false;
+        //Debug.Log("canMove " + canMove);
+        if (currentState == State.blackMoving && pa >= -1) canMove = true;
+        if (currentState == State.whiteMoving && pa <= 1) canMove = true;
+        if (canMove)
+        {
+            // è®°å½•
+            currentSteps.Add(index);
+            stepsResult.Add(new List<int>(currentSteps));
+            PC.lightOnePS(logic2world(currentPos));
+            canMovePos.Add(currentPos);
+            recur(0);
+            recur(1);
+            recur(2);
+            recur(3);
+            currentSteps.Remove(index);
+        }
+        currentPos -= randomNum[index];
+    }
+
+    private int world2logic(int worldIndex)
+    {
+        // ä¸–ç•Œåæ ‡ï¼šæ£‹ç›˜çš„åæ ‡
+        // --> é€»è¾‘åæ ‡ï¼š
+        //     0ä¸ºè¢«åƒçš„ä½ç½®
+        //     1~24ä¸ºå‰è¿›è·¯çº¿ç¬¬ä¸€æ ¼åˆ°æœ€åä¸€æ ¼
+        //     25ä¸ºç»ˆç‚¹ä½ç½®
+        //     -1è¡¨ç¤ºé”™è¯¯
         if (currentState == State.blackMoving)
         {
-            if (index == 24 || moveI2J[0] == 27) return false;
-            if (index == 25)
-            {
-                if (positiveMoves.Contains(24 - moveI2J[0]) && blackCanFinish) return true;
-                else return false;
-            }
-            if (moveI2J[0] == 26)
-            {
-                // ºÚÆåÊÔÍ¼´ÓÆğµã³ö·¢
-                if (!positiveMoves.Contains(index + 1)) return false;
-            }
-            else
-            {
-                if (!positiveMoves.Contains(index - moveI2J[0])) { Debug.Log("µãÊı²»Æ¥Åä"); return false; }
-            }
-            if (PC.piecesArray[index] <= -2) { Debug.Log("ÓĞ°×ÆåÔÚ"); return false; }
-            if (PC.piecesArray[index] == -1) { Debug.Log("³Ôµô°×Æå"); if (!isSim) die = 2; }
+            if (worldIndex == 26) return 0;
+            else if (worldIndex == 25) return 25;
+            else if (worldIndex >= 0 && worldIndex <= 23) return worldIndex + 1;
         }
         else if (currentState == State.whiteMoving)
         {
-            if (index == 25 || moveI2J[0] == 26) return false;
-            if (index == 24)
-            {
-                if (positiveMoves.Contains(1 + moveI2J[0]) && whiteCanFinish) return true;
-                else return false;
-            }
-            if (moveI2J[0] == 27)
-            {
-                // °×ÆåÊÔÍ¼´ÓÆğµã³ö·¢
-                if (!positiveMoves.Contains(24 - index)) return false;
-            }
-            else
-            {
-                if (!positiveMoves.Contains(moveI2J[0] - index)) { Debug.Log("µãÊı²»Æ¥Åä"); return false; }
-            }
-            if (PC.piecesArray[index] >= 2) { Debug.Log("ÓĞºÚÆåÔÚ"); return false; }
-            if (PC.piecesArray[index] == 1) { Debug.Log("³ÔµôºÚÆå"); if (!isSim) die = 1; }
+            if (worldIndex == 27) return 0;
+            else if (worldIndex == 24) return 25;
+            else if (worldIndex >= 0 && worldIndex <= 23) return 24 - worldIndex;
         }
-        return true;
+        return -1;
     }
 
-    private int reSum;
-
-    private void initPosTar()
+    private int logic2world(int logicIndex)
     {
-        positiveMoves = new List<int>();
-        reSum = 0;
-        recur(0);
-        Debug.Log("===== positiveMoves =====");
-        positiveMoves.ForEach(item => Debug.Log(item));
-    }
-
-    private void recur(int start)
-    {
-        if (reSum > 0 && !positiveMoves.Contains(reSum)) positiveMoves.Add(reSum);
-        if (start == randomNum.Length) return;
-        recur(start + 1);
-        reSum += randomNum[start];
-        recur(start + 1);
-        reSum -= randomNum[start];
-    }
-
-    private bool recurDel(int start)
-    {
-        if (reSum == 0) return true;
-        if (start == randomNum.Length) return false;
-        // Ê¹ÓÃ×ÔÉí
-        int tmp = randomNum[start];
-        reSum -= tmp;
-        randomNum[start] = 0;
-        if (recurDel(start + 1)) return true;
-        reSum += tmp;
-        randomNum[start] = tmp;
-        // ²»ÓÃ×ÔÉí
-        if (recurDel(start + 1)) return true;
-        return false;
+        // é€»è¾‘åæ ‡ --> ä¸–ç•Œåæ ‡
+        if (currentState == State.blackMoving)
+        {
+            if (logicIndex == 0) return 26;
+            else if (logicIndex == 25) return 25;
+            else if (logicIndex >= 1 && logicIndex <= 24) return logicIndex - 1;
+        }
+        else if (currentState == State.whiteMoving)
+        {
+            if (logicIndex == 0) return 27;
+            else if (logicIndex == 25) return 24;
+            else if (logicIndex >= 1 && logicIndex <= 24) return 24 - logicIndex;
+        }
+        return -1;
     }
 }

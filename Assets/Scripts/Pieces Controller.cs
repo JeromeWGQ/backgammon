@@ -1,87 +1,59 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class PiecesController : MonoBehaviour
 {
-    // ¸ÃÊı×é¼ÇÂ¼ËùÓĞÎ»ÖÃµÄÆå×ÓÊıÁ¿
-    // ´ÓÓÒÏÂ½Ç¿ªÊ¼Êı£¬Ë³Ê±ÕëĞı×ª£¬Îª0~23Î»ÖÃ
-    // ÓÒÏÂµÄÖÕµã²Û£¬·Å°××Ó£¬Îª24Î»ÖÃ
-    // ÓÒÉÏµÄÖÕµã²Û£¬·ÅºÚ×Ó£¬Îª25Î»ÖÃ
-    // ÖĞÏÂµÄ±»³ÔÆåÎ»ÖÃ£¬·ÅºÚ×Ó£¬Îª26Î»ÖÃ
-    // ÖĞÉÏµÄ±»³ÔÆåÎ»ÖÃ£¬·Å°××Ó£¬Îª27Î»ÖÃ
-    // ºÚÆåÄ¿±êÎªË³Ê±Õë×ßµ½ÓÒÉÏÖÕµã£¬°×ÆåÄ¿±êÎªÄæÊ±Õë×ßµ½ÓÒÏÂÖÕµã
-    // Êı×éÕıÊı±íÊ¾ºÚÆå£¬¸ºÊı±íÊ¾°×Æå£¬0±íÊ¾Ã»ÓĞÆå
+    // è¯¥æ•°ç»„è®°å½•æ‰€æœ‰ä½ç½®çš„æ£‹å­æ•°é‡
+    // ä»å³ä¸‹è§’å¼€å§‹æ•°ï¼Œé¡ºæ—¶é’ˆæ—‹è½¬ï¼Œä¸º0~23ä½ç½®
+    // å³ä¸‹çš„ç»ˆç‚¹æ§½ï¼Œæ”¾ç™½å­ï¼Œä¸º24ä½ç½®
+    // å³ä¸Šçš„ç»ˆç‚¹æ§½ï¼Œæ”¾é»‘å­ï¼Œä¸º25ä½ç½®
+    // ä¸­ä¸‹çš„è¢«åƒæ£‹ä½ç½®ï¼Œæ”¾é»‘å­ï¼Œä¸º26ä½ç½®
+    // ä¸­ä¸Šçš„è¢«åƒæ£‹ä½ç½®ï¼Œæ”¾ç™½å­ï¼Œä¸º27ä½ç½®
+    // é»‘æ£‹ç›®æ ‡ä¸ºé¡ºæ—¶é’ˆèµ°åˆ°å³ä¸Šç»ˆç‚¹ï¼Œç™½æ£‹ç›®æ ‡ä¸ºé€†æ—¶é’ˆèµ°åˆ°å³ä¸‹ç»ˆç‚¹
+    // æ•°ç»„æ­£æ•°è¡¨ç¤ºé»‘æ£‹ï¼Œè´Ÿæ•°è¡¨ç¤ºç™½æ£‹ï¼Œ0è¡¨ç¤ºæ²¡æœ‰æ£‹
     public int[] piecesArray = new int[28];
 
     public GameObject blackPrefab;
     public GameObject whitePrefab;
     public GameObject piecesParent;
 
-    // ´æ·ÅËùÓĞÆå×ÓGameObject, [posIndex,pieceIndex]
+    // å­˜æ”¾æ‰€æœ‰æ£‹å­GameObject, [posIndex,pieceIndex]
     private GameObject[,] objs;
 
     // Start is called before the first frame update
     void Start()
     {
-        initPiecesData();
+        initPiecesData(false);
         initAllPiecesObject();
         initAllPrismSel();
         enableAllPS();
     }
 
-    public Transform objectToMove; // ÒªÒÆ¶¯µÄÎïÌå
-    private float timer; // ÓÃÓÚ¿ØÖÆ²åÖµµÄ¼ÆÊ±Æ÷
-    private Vector3 startPosM; // ÆğÊ¼Î»ÖÃ
-    private Vector3 targetPosM; // Ä¿±êÎ»ÖÃ
-    private int targetIndex;
-
-    private Transform nextObjectToMove; // ÏÂÒ»¸öÒªÒÆ¶¯µÄÎïÌå
-    private float nextTimer;
-    private Vector3 nextStartPosM;
-    private Vector3 nextTargetPosM;
-    private int nextTargetIndex;
-
     // Update is called once per frame
     void Update()
     {
-        // »ñÈ¡Ë®Æ½ºÍ´¹Ö±ÖáµÄÊäÈëÖµ
-        //float horizontal = Input.GetAxis("Horizontal");
-        //float vertical = Input.GetAxis("Vertical");
-        //if (horizontal < 0)
-        //{
-        //    moveAPiece(0, 4);
-        //}
-        //if (Input.GetKeyDown(KeyCode.Space))
-        //{
-        //    lightOnePS(10);
-        //}
-        //if (Input.GetKeyDown(KeyCode.M))
-        //{
-        //    enableAllPS();
-        //}
-        if (objectToMove != null)
-        {
-            timer += Time.deltaTime * 1.5f;
-            objectToMove.position = Vector3.Lerp(startPosM, targetPosM, timer);
-            if (objectToMove.position == targetPosM)
-            {
-                if (targetIndex == 24 || targetIndex == 25) objectToMove.transform.Rotate(-15, 0, 0);
-                // Å²¶¯¶ÓÁĞÀïµÄÆå×Ó
-                objectToMove = nextObjectToMove;
-                timer = nextTimer;
-                startPosM = nextStartPosM;
-                targetPosM = nextTargetPosM;
-                targetIndex = nextTargetIndex;
-                nextObjectToMove = null;
-            }
-        }
+        
     }
 
-    void initPiecesData()
+    void initPiecesData(bool isTest)
     {
         System.Array.Fill(piecesArray, 0);
-        // ÆÌÆåÅÌ
+        // é“ºæ£‹ç›˜
+        if (isTest)
+        {
+            piecesArray[0] = -2;
+            piecesArray[1] = -3;
+            piecesArray[2] = -3;
+            piecesArray[3] = -3;
+            piecesArray[4] = -2;
+            piecesArray[5] = -2;
+            piecesArray[23] = 2;
+            piecesArray[22] = 3;
+            piecesArray[21] = 3;
+            piecesArray[20] = 3;
+            piecesArray[19] = 2;
+            piecesArray[18] = 2;
+            return;
+        }
         piecesArray[0] = 2;
         piecesArray[5] = -5;
         piecesArray[7] = -3;
@@ -99,7 +71,7 @@ public class PiecesController : MonoBehaviour
         {
             if (piecesArray[i] > 0)
             {
-                // ºÚÆå
+                // é»‘æ£‹
                 for (int j = 0; j < piecesArray[i]; j++)
                 {
                     GameObject prefabInstance = Instantiate(blackPrefab);
@@ -110,7 +82,7 @@ public class PiecesController : MonoBehaviour
             }
             else if (piecesArray[i] < 0)
             {
-                // °×Æå
+                // ç™½æ£‹
                 for (int j = 0; j > piecesArray[i]; j--)
                 {
                     GameObject prefabInstance = Instantiate(whitePrefab);
@@ -140,8 +112,8 @@ public class PiecesController : MonoBehaviour
             prefabInstance.transform.parent = piecesParent.transform;
             pss[i] = prefabInstance;
         }
-        // ÓÒÏÂµÄÖÕµã²Û£¬·Å°××Ó£¬Îª24Î»ÖÃ
-        // ÓÒÉÏµÄÖÕµã²Û£¬·ÅºÚ×Ó£¬Îª25Î»ÖÃ
+        // å³ä¸‹çš„ç»ˆç‚¹æ§½ï¼Œæ”¾ç™½å­ï¼Œä¸º24ä½ç½®
+        // å³ä¸Šçš„ç»ˆç‚¹æ§½ï¼Œæ”¾é»‘å­ï¼Œä¸º25ä½ç½®
         pss[24] = GameObject.Find("Right Sel DOWN");
         pss[25] = GameObject.Find("Right Sel UP");
     }
@@ -159,7 +131,7 @@ public class PiecesController : MonoBehaviour
         if (pss[i] != null) pss[i].GetComponent<Renderer>().enabled = true;
     }
 
-    // ÆåÅÌµÄºáÏò×ø±ê
+    // æ£‹ç›˜çš„æ¨ªå‘åæ ‡
     private float[] xxx = new float[] { 10f, 8.4f, 6.8f, 5.2f, 3.6f, 2f };
 
     Vector3 getPieceXYZ(int posIndex, int pieceIndex)
@@ -169,7 +141,7 @@ public class PiecesController : MonoBehaviour
             float targetX = 1f;
             float targetY = 0.06f;
             float targetZ = 1f;
-            // ¼ÆËãX×ø±ê
+            // è®¡ç®—Xåæ ‡
             if (posIndex <= 5)
             {
                 targetX = xxx[posIndex];
@@ -186,7 +158,7 @@ public class PiecesController : MonoBehaviour
             {
                 targetX = xxx[23 - posIndex];
             }
-            // ¼ÆËãZ×ø±ê, todo: Y×ø±êµş¶ş²ãµÄÂß¼­
+            // è®¡ç®—Zåæ ‡, todo: Yåæ ‡å äºŒå±‚çš„é€»è¾‘
             if (posIndex <= 11)
             {
                 targetZ = -6.3f + pieceIndex * 1.25f;
@@ -199,8 +171,8 @@ public class PiecesController : MonoBehaviour
         }
         else if (posIndex <= 25)
         {
-            // ÓÒÏÂµÄÖÕµã²Û£¬·Å°××Ó£¬Îª24Î»ÖÃ
-            // ÓÒÉÏµÄÖÕµã²Û£¬·ÅºÚ×Ó£¬Îª25Î»ÖÃ
+            // å³ä¸‹çš„ç»ˆç‚¹æ§½ï¼Œæ”¾ç™½å­ï¼Œä¸º24ä½ç½®
+            // å³ä¸Šçš„ç»ˆç‚¹æ§½ï¼Œæ”¾é»‘å­ï¼Œä¸º25ä½ç½®
             if (posIndex == 24)
                 return new Vector3(11.889f, 0.28f, -1.45f - pieceIndex * 0.325f);
             else
@@ -208,12 +180,12 @@ public class PiecesController : MonoBehaviour
         }
         else if (posIndex <= 27)
         {
-            // ÖĞÏÂµÄ±»³ÔÆåÎ»ÖÃ£¬·ÅºÚ×Ó£¬Îª26Î»ÖÃ
-            // ÖĞÉÏµÄ±»³ÔÆåÎ»ÖÃ£¬·Å°××Ó£¬Îª27Î»ÖÃ
+            // ä¸­ä¸‹çš„è¢«åƒæ£‹ä½ç½®ï¼Œæ”¾é»‘å­ï¼Œä¸º26ä½ç½®
+            // ä¸­ä¸Šçš„è¢«åƒæ£‹ä½ç½®ï¼Œæ”¾ç™½å­ï¼Œä¸º27ä½ç½®
             float targetX = 0f;
             float targetY = 0.3f;
             float targetZ = 1f;
-            // ¼ÆËãZ×ø±ê, todo: Y×ø±êµş¶ş²ãµÄÂß¼­
+            // è®¡ç®—Zåæ ‡
             if (posIndex == 26)
             {
                 targetZ = -5.5f + pieceIndex * 2f;
@@ -230,31 +202,17 @@ public class PiecesController : MonoBehaviour
         }
     }
 
-    public void moveAPiece(int oriPos, int targetPos)
+    public void moveAPieceData(int oriPos, int targetPos)
     {
         if (piecesArray[oriPos] == 0) return;
         GameObject go = objs[oriPos, Mathf.Abs(piecesArray[oriPos]) - 1];
         Vector3 targetV = getPieceXYZ(targetPos, Mathf.Abs(piecesArray[targetPos]));
-        // ÒÆ¶¯Æå×Ó
-        if (objectToMove == null)
-        {
-            objectToMove = go.transform;
-            timer = 0f;
-            startPosM = objectToMove.position;
-            targetPosM = targetV;
-            targetIndex = targetPos;
-        }
-        else
-        {
-            nextObjectToMove = go.transform;
-            nextTimer = 0f;
-            nextStartPosM = nextObjectToMove.position;
-            nextTargetPosM = targetV;
-            nextTargetIndex = targetPos;
-        }
-        // µ÷ÕûÊı¾İ
+        // è°ƒæ•´æ•°æ®
         objs[targetPos, Mathf.Abs(piecesArray[targetPos])] = go;
         objs[oriPos, Mathf.Abs(piecesArray[oriPos]) - 1] = null;
+        // æ’­æ”¾åŠ¨ç”»
+        PieceController pCon = go.GetComponent<PieceController>();
+        pCon.SetTargetPosition(targetV);
     }
 
     private GameObject pickuped;
@@ -262,12 +220,12 @@ public class PiecesController : MonoBehaviour
     public void pickupAPiece(int pos)
     {
         pickuped = objs[pos, Mathf.Abs(piecesArray[pos]) - 1];
-        pickuped.transform.position += new Vector3(0, 0.5f, 0);
+        pickuped.GetComponent<PieceController>().pickup();
     }
 
     public void removePickup()
     {
-        pickuped.transform.position += new Vector3(0, -0.5f, 0);
+        pickuped.GetComponent<PieceController>().unPickup();
         pickuped = null;
         enableAllPS();
     }
