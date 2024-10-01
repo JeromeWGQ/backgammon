@@ -52,6 +52,7 @@ public class PiecesController : MonoBehaviour
             piecesArray[20] = 3;
             piecesArray[19] = 2;
             piecesArray[18] = 2;
+            //piecesArray[18] = 15;
             return;
         }
         piecesArray[0] = 2;
@@ -158,15 +159,22 @@ public class PiecesController : MonoBehaviour
             {
                 targetX = xxx[23 - posIndex];
             }
-            // 计算Z坐标, todo: Y坐标叠二层的逻辑
-            if (posIndex <= 11)
-            {
-                targetZ = -6.3f + pieceIndex * 1.25f;
-            }
-            else
-            {
-                targetZ = 6.3f - pieceIndex * 1.25f;
-            }
+            // 计算叠在第几层
+            int layer = 0;
+            if (pieceIndex < 5) layer = 0;
+            else if (pieceIndex < 9) layer = 1;
+            else if (pieceIndex < 12) layer = 2;
+            else if (pieceIndex < 14) layer = 3;
+            else layer = 4;
+            // 计算Z坐标
+            if (layer == 0) targetZ = -6.3f +  pieceIndex               * 1.25f;
+            if (layer == 1) targetZ = -6.3f + (pieceIndex -  5f + 0.5f) * 1.25f;
+            if (layer == 2) targetZ = -6.3f + (pieceIndex -  9f +   1f) * 1.25f;
+            if (layer == 3) targetZ = -6.3f + (pieceIndex - 12f + 1.5f) * 1.25f;
+            if (layer == 4) targetZ = -6.3f + (pieceIndex - 14f +   2f) * 1.25f;
+            if (posIndex >= 12) targetZ = -targetZ;
+            // 计算Y坐标
+            targetY += 0.2f * layer;
             return new Vector3(targetX, targetY, targetZ);
         }
         else if (posIndex <= 25)
@@ -228,5 +236,11 @@ public class PiecesController : MonoBehaviour
         pickuped.GetComponent<PieceController>().unPickup();
         pickuped = null;
         enableAllPS();
+    }
+
+    public void shakeDied(int worldPos)
+    {
+        ShakeAndHighlight sah = objs[worldPos, Mathf.Abs(piecesArray[worldPos]) - 1].GetComponent<ShakeAndHighlight>();
+        sah.TriggerShakeAndHighlight();
     }
 }

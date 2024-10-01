@@ -214,8 +214,9 @@ public class GameController : MonoBehaviour
             PC.pickupAPiece(index);
             updateCanFinish();
             // 判断在起点有被吃子
-            if (PC.piecesArray[logic2world(0)] > 0 && index != logic2world(0))
+            if (PC.piecesArray[logic2world(0)] != 0 && index != logic2world(0))
             {
+                PC.shakeDied(logic2world(0));
                 moveI2J.RemoveAt(0); PC.removePickup(); return;
             }
             judgeAllCanMove();
