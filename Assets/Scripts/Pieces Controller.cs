@@ -220,7 +220,8 @@ public class PiecesController : MonoBehaviour
         objs[oriPos, Mathf.Abs(piecesArray[oriPos]) - 1] = null;
         // 播放动画
         PieceController pCon = go.GetComponent<PieceController>();
-        pCon.SetTargetPosition(targetV);
+        pCon.MoveToTarget(targetV,true);
+        pCon.ChangeBackColor();
     }
 
     private GameObject pickuped;

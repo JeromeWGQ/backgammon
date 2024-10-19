@@ -61,6 +61,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets/Scripts/ShakeAndHighlight.cs" />
+    <Compile Include="Assets/Scripts/ui/HighlightableImage.cs" />
     <Compile Include="Assets/Scripts/SelFlash.cs" />
     <Compile Include="Assets/Scripts/Arrow/Arrow Flash.cs" />
     <Compile Include="Assets/Scripts/Pieces Controller.cs" />

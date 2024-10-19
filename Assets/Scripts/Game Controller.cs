@@ -24,6 +24,11 @@ public class GameController : MonoBehaviour
     private TMP_Text blackTextBox;
     private TMP_Text whiteTextBox;
 
+    private HighlightableImage hiBlack;
+    private HighlightableImage hiWhite;
+
+    private int round;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -31,12 +36,16 @@ public class GameController : MonoBehaviour
         PC = pcgo.GetComponent<PiecesController>();
         // 先进入黑色骰子阶段
         currentState = State.blackDice;
+        round = 0;
         // 找到TextMeshPro组件所在的GameObject
         GameObject textMeshProGameObjectB = GameObject.Find("Bnum");
         GameObject textMeshProGameObjectW = GameObject.Find("Wnum");
         // 获取TextMeshPro组件
         blackTextBox = textMeshProGameObjectB.GetComponent<TMP_Text>();
         whiteTextBox = textMeshProGameObjectW.GetComponent<TMP_Text>();
+        // 获取ui上方左右的走棋提示
+        hiBlack = GameObject.Find("BlackUITip").GetComponent<HighlightableImage>();
+        hiWhite = GameObject.Find("WhiteUITip").GetComponent<HighlightableImage>();
     }
 
     private int[] randomNum;
@@ -63,17 +72,21 @@ public class GameController : MonoBehaviour
             {
                 currentState = State.blackMoving;
                 moveI2J = new List<int>();
-                Debug.Log("轮到黑走");
-                Btip.SetActive(true);
+                //Debug.Log("轮到黑走");
+                if(round++ < 10) Btip.SetActive(true);
                 Wtip.SetActive(false);
+                hiBlack.ScaleImageUp();
+                hiWhite.RestoreOriginalSize();
             }
             else if (currentState == State.whiteDice)
             {
                 currentState = State.whiteMoving;
                 moveI2J = new List<int>();
-                Debug.Log("轮到白走");
+                //Debug.Log("轮到白走");
+                if (round++ < 10) Wtip.SetActive(true);
                 Btip.SetActive(false);
-                Wtip.SetActive(true);
+                hiWhite.ScaleImageUp();
+                hiBlack.RestoreOriginalSize();
             }
         }
         if (currentState == State.blackMoving || currentState == State.whiteMoving)
@@ -93,7 +106,7 @@ public class GameController : MonoBehaviour
                             PC.moveAPieceData(removedPos, 26);
                             PC.piecesArray[removedPos]--;
                             PC.piecesArray[26]++;
-                            Debug.Log("死黑棋位置：" + removedPos);
+                            //Debug.Log("死黑棋位置：" + removedPos);
                         }
                         else if (PC.piecesArray[removedPos] == -1)
                         {
@@ -101,7 +114,7 @@ public class GameController : MonoBehaviour
                             PC.moveAPieceData(removedPos, 27);
                             PC.piecesArray[removedPos]++;
                             PC.piecesArray[27]--;
-                            Debug.Log("死白棋位置：" + removedPos);
+                            //Debug.Log("死白棋位置：" + removedPos);
                         }
                     }
                 }
@@ -211,14 +224,15 @@ public class GameController : MonoBehaviour
             if (currentState == State.blackMoving && PC.piecesArray[index] < 0) return;
             if (currentState == State.whiteMoving && PC.piecesArray[index] > 0) return;
             moveI2J.Add(index);
-            PC.pickupAPiece(index);
             updateCanFinish();
             // 判断在起点有被吃子
             if (PC.piecesArray[logic2world(0)] != 0 && index != logic2world(0))
             {
                 PC.shakeDied(logic2world(0));
-                moveI2J.RemoveAt(0); PC.removePickup(); return;
+                moveI2J.RemoveAt(0);
+                return;
             }
+            PC.pickupAPiece(index);
             judgeAllCanMove();
         }
         else if (moveI2J.Count == 1)
