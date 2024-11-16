@@ -40,19 +40,12 @@ public class PiecesController : MonoBehaviour
         // 铺棋盘
         if (isTest)
         {
-            piecesArray[0] = -2;
-            piecesArray[1] = -3;
-            piecesArray[2] = -3;
-            piecesArray[3] = -3;
-            piecesArray[4] = -2;
-            piecesArray[5] = -2;
-            piecesArray[23] = 2;
-            piecesArray[22] = 3;
-            piecesArray[21] = 3;
-            piecesArray[20] = 3;
-            piecesArray[19] = 2;
-            piecesArray[18] = 2;
-            //piecesArray[18] = 15;
+            piecesArray[0] = -4;
+            piecesArray[1] = -2;
+            piecesArray[2] = -4;
+            piecesArray[3] = -2;
+            piecesArray[5] = -3;
+            piecesArray[26] = 2;
             return;
         }
         piecesArray[0] = 2;

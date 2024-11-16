@@ -38,7 +38,7 @@ public class PieceController : MonoBehaviour
             if (withCurve)
             {
                 // 实现抛物线效果
-                float yInc = (1 - (t - 0.5f) * (t - 0.5f) * 4) * 0.8f;
+                float yInc = (1 - (t - 0.5f) * (t - 0.5f) * 4) * 0.6f;
                 yV = new Vector3(0, yInc, 0);
             }
 
