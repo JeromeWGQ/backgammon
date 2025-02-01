@@ -19,12 +19,25 @@ public class PiecesController : MonoBehaviour
     // 存放所有棋子GameObject, [posIndex,pieceIndex]
     private GameObject[,] objs;
 
+    public bool isTest;
+
     // Start is called before the first frame update
     void Start()
     {
-        initPiecesData(false);
+        initPiecesData();
         initAllPiecesObject();
         initAllPrismSel();
+        enableAllPS();
+    }
+
+    public void restart()
+    {
+        initPiecesData();
+
+        // 棋子重建
+        destoryAllPiecesObject();
+        initAllPiecesObject();
+
         enableAllPS();
     }
 
@@ -34,7 +47,7 @@ public class PiecesController : MonoBehaviour
         
     }
 
-    void initPiecesData(bool isTest)
+    void initPiecesData()
     {
         System.Array.Fill(piecesArray, 0);
         // 铺棋盘
@@ -83,6 +96,21 @@ public class PiecesController : MonoBehaviour
                     prefabInstance.transform.position = getPieceXYZ(i, -j);
                     prefabInstance.transform.parent = piecesParent.transform;
                     objs[i, -j] = prefabInstance;
+                }
+            }
+        }
+    }
+
+    void destoryAllPiecesObject()
+    {
+        // 遍历二维数组并销毁每个元素
+        for (int i = 0; i < objs.GetLength(0); i++)
+        {
+            for (int j = 0; j < objs.GetLength(1); j++)
+            {
+                if (objs[i, j] != null)
+                {
+                    Destroy(objs[i, j]);
                 }
             }
         }

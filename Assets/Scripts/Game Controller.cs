@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using UnityEngine.UI; // 用于访问 UI 元素
 
 public class GameController : MonoBehaviour
 {
@@ -27,9 +28,17 @@ public class GameController : MonoBehaviour
     private HighlightableImage hiBlack;
     private HighlightableImage hiWhite;
 
+    public SoundController sc;
+
     private int round;
 
     private DiceController[,] DiceCons;
+
+    // 引用“重新开始”按钮
+    public Button restartButton;
+
+    // 游戏状态变量
+    private bool isGameOver;
 
     // Start is called before the first frame update
     void Start()
@@ -58,6 +67,76 @@ public class GameController : MonoBehaviour
         DiceCons[1, 1] = GameObject.Find("DiceW2").GetComponent<DiceController>();
         DiceCons[1, 2] = GameObject.Find("DiceW3").GetComponent<DiceController>();
         DiceCons[1, 3] = GameObject.Find("DiceW4").GetComponent<DiceController>();
+
+        // 初始化游戏状态
+        isGameOver = false;
+
+        // 设置按钮的初始状态：不可见且不可点击
+        restartButton.gameObject.SetActive(false);
+        restartButton.interactable = false;
+
+        // 设置按钮点击事件监听器
+        restartButton.onClick.AddListener(RestartGame);
+    }
+
+    // 游戏结束逻辑（由其他脚本调用）
+    public void GameEnd(string winner)
+    {
+        isGameOver = true;
+
+        // 显示获胜信息和“重新开始”按钮
+        // 假设你有一个 UI 元素来显示获胜者信息
+        // winText.text = "Winner: " + winner; // winText 是一个 Text 组件的引用
+        if(winner=="black") blackTextBox.text = "Black Win";
+        else whiteTextBox.text = "White Win";
+
+        // 显示“重新开始”按钮
+        restartButton.gameObject.SetActive(true);
+        restartButton.interactable = true;
+    }
+
+    // 重置游戏逻辑
+    public void RestartGame()
+    {
+        // 重置棋盘和棋子（具体实现取决于你的游戏逻辑）
+        ResetBoardAndPieces();
+
+        // 重置游戏状态
+        isGameOver = false;
+
+        // 隐藏“重新开始”按钮并禁用其交互性
+        restartButton.gameObject.SetActive(false);
+        restartButton.interactable = false;
+
+        // 重新初始化其他必要的游戏逻辑脚本（如果有的话）
+    }
+
+    // 重置棋盘和棋子的具体实现（需要根据你的游戏逻辑来实现）
+    private void ResetBoardAndPieces()
+    {
+        // 先进入黑色骰子阶段
+        currentState = State.blackDice;
+        round = 0;
+
+        // 初始化游戏状态
+        isGameOver = false;
+
+        // 设置按钮的初始状态：不可见且不可点击
+        restartButton.gameObject.SetActive(false);
+        restartButton.interactable = false;
+
+        // 一些类变量的重新初始化
+        moveI2J = new List<int>();
+        isPaused = false;
+        blackCanFinish = false;
+        whiteCanFinish = false;
+
+        // 铺棋盘
+        PC.restart();
+
+        // 文本
+        blackTextBox.text = "";
+        whiteTextBox.text = "";
     }
 
     private int[] randomNum;
@@ -67,7 +146,7 @@ public class GameController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (isPaused) return;
+        if (isPaused || isGameOver) return;
         if (currentState == State.blackDice || currentState == State.whiteDice)
         {
             randomNum = new int[4];
@@ -92,7 +171,7 @@ public class GameController : MonoBehaviour
             
             // 等待骰子转完
             StartCoroutine(DelayExample(2.5f));
-            
+
         }
         if (currentState == State.blackMoving || currentState == State.whiteMoving)
         {
@@ -135,6 +214,21 @@ public class GameController : MonoBehaviour
                 }
                 // 清空moveI2J，等待下次点击
                 moveI2J = new List<int>();
+
+                // 判断是否胜利
+                if (currentState == State.blackMoving && PC.piecesArray[25] == 15)
+                {
+                    // 黑方胜利
+                    Debug.Log("black win");
+                    GameEnd("black");
+                }
+                else if (currentState == State.whiteMoving && PC.piecesArray[24] == -15)
+                {
+                    // 白方胜利
+                    Debug.Log("white win");
+                    GameEnd("white");
+                }
+
                 // 骰子用光，交换回合
                 if (randomNum[0] + randomNum[1] + randomNum[2] + randomNum[3] == 0)
                 {
@@ -177,6 +271,8 @@ public class GameController : MonoBehaviour
             judgeHasNoCanMove();
         }
 
+        sc.PlayDiceSound();
+
         // 打印结束信息
         //Debug.Log("等待结束！");
     }
@@ -200,7 +296,40 @@ public class GameController : MonoBehaviour
         else
         {
             // 无被吃子
-            // todo: 概率很低，回头再写判断
+            bool canMove = false;
+            for (int i = 0; i < 24; i++)
+            {
+                int index = logic2world(i);
+                int pa = PC.piecesArray[logic2world(i)];
+                if(currentState == State.blackMoving && pa > 0)
+                {
+                    moveI2J.Add(index);
+                    judgeAllCanMove();
+                    if (canMovePos.Count > 0) canMove = true;
+                    // 清空moveI2J
+                    moveI2J = new List<int>();
+                    PC.enableAllPS();
+                }
+                else if(currentState == State.whiteMoving && pa < 0)
+                {
+                    moveI2J.Add(index);
+                    judgeAllCanMove();
+                    if (canMovePos.Count > 0) canMove = true;
+                    // 清空moveI2J
+                    moveI2J = new List<int>();
+                    PC.enableAllPS();
+                }
+            }
+            if (!canMove) hasNoCanMove = true;
+        }
+        updateCanFinish();
+        if (currentState == State.blackMoving && blackCanFinish)
+        {
+            hasNoCanMove = false;
+        }
+        if (currentState == State.whiteMoving && whiteCanFinish)
+        {
+            hasNoCanMove = false;
         }
         // “独游”的处理
         if (hasNoCanMove)
@@ -368,7 +497,7 @@ public class GameController : MonoBehaviour
     // 执行的起点，响应鼠标点击事件
     public void ReceiveMouseDown(int index)
     {
-        if (isPaused) return;
+        if (isPaused || isGameOver) return;
         if (moveI2J.Count == 0)
         {
             // 第一步

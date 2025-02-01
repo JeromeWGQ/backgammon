@@ -10,17 +10,17 @@ public class PieceController : MonoBehaviour
     private bool isMoving = false;
 
     // 调用此函数以开始移动到目标位置  
-    public void MoveToTarget(Vector3 position, bool withCurve, float speed = 1.0f)
+    public void MoveToTarget(Vector3 position, bool withCurve, float speed = 1.0f, bool playSound = true)
     {
         duration = speed;
         if (!isMoving)
         {
-            StartCoroutine(MoveWithEaseCoroutine(position, duration, withCurve));
+            StartCoroutine(MoveWithEaseCoroutine(position, duration, withCurve, playSound));
         }
     }
 
     // 协程实现移动和缓动效果  
-    private System.Collections.IEnumerator MoveWithEaseCoroutine(Vector3 position, float time, bool withCurve)
+    private System.Collections.IEnumerator MoveWithEaseCoroutine(Vector3 position, float time, bool withCurve, bool playSound)
     {
         isMoving = true;
         targetPosition = position;
@@ -47,27 +47,34 @@ public class PieceController : MonoBehaviour
             yield return null;
         }
 
+        if(playSound) sc.PlayDropSound();
+
         transform.position = targetPosition; // 确保最终位置精确到达  
         isMoving = false;
     }
 
     public void pickup()
     {
-        MoveToTarget(targetPosition + new Vector3(0, 0.5f, 0),false, 0.1f);
+        MoveToTarget(targetPosition + new Vector3(0, 0.5f, 0),false, 0.1f,false);
         ChangeColor();
+        sc.PlaySelectSound();
     }
 
     public void unPickup()
     {
-        MoveToTarget(targetPosition + new Vector3(0, -0.5f, 0),false, 0.1f);
+        MoveToTarget(targetPosition + new Vector3(0, -0.5f, 0),false, 0.1f,false);
         ChangeColor();
+        sc.PlayCancelSound();
     }
+
+    private SoundController sc;
 
     private void Start()
     {
         targetPosition = transform.position;
         renderer = GetComponent<Renderer>();
         originalColor = renderer.material.color;
+        sc = GameObject.Find("SoundController").GetComponent<SoundController>();
     }
 
     void Update()
